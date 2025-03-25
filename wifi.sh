@@ -1,18 +1,36 @@
 #!/bin/bash
 
-# Mostrar la lista de dispositivos Wi-Fi
-echo "Dispositivos Wi-Fi disponibles:"
-iwctl device list
+while true; do
+  # Mostrar la lista de dispositivos Wi-Fi
+  echo "Dispositivos Wi-Fi disponibles:"
+  iwctl device list
 
-# Solicitar al usuario que seleccione la interfaz
-read -p "Introduce el nombre de la interfaz Wi-Fi (ej: wlan0, wlan1): " interface
+  # Solicitar al usuario que seleccione la interfaz
+  read -p "Introduce el nombre de la interfaz Wi-Fi (ej: wlan0, wlan1): " interface
 
-# Mostrar las redes disponibles para la interfaz seleccionada
-iwctl station "$interface" scan
-iwctl station "$interface" get-networks
+  # Verificar si la interfaz existe
+  if iwctl device list | grep -q "$interface"; then
+    break # Interfaz válida, salir del bucle
+  else
+    echo "Interfaz no válida. Inténtalo de nuevo."
+  fi
+done
 
-# Solicitar el nombre de la red (SSID)
-read -p "Introduce el nombre de la red (SSID): " ssid
+while true; do
+  # Mostrar las redes disponibles para la interfaz seleccionada
+  iwctl station "$interface" scan
+  iwctl station "$interface" get-networks
+
+  # Solicitar el nombre de la red (SSID)
+  read -p "Introduce el nombre de la red (SSID): " ssid
+
+  # Verificar si la red existe
+  if iwctl station "$interface" get-networks | grep -q "$ssid"; then
+    break # SSID válido, salir del bucle
+  else
+    echo "SSID no válido. Inténtalo de nuevo."
+  fi
+done
 
 # Solicitar la contraseña de la red
 read -s -p "Introduce la contraseña de la red: " password
